@@ -13,21 +13,43 @@ O foco principal do sistema é garantir o 'Suporte à Vida'. Para isso, o progra
 ## Funcionalidades
 
 - **Atualização de sensores** sob demanda via botão interativo
-- **Monitoramento de 4 métricas** em tempo real:
+- **Sensores Vitais** — monitoramento de 4 métricas em tempo real:
   - Nível de Bateria (%)
   - Temperatura do Laboratório (°C)
   - Sinal de Comunicação (%)
   - Status Geral (OPERACIONAL / ALERTA / CRÍTICO)
+- **Matriz Energética** — cálculo dinâmico de geração vs. consumo:
+  - Incidência Solar (Sol Pleno / Sombra por Eclipse)
+  - Geração Solar (kW)
+  - Consumo Total com destaque do consumo do laboratório (kW)
+  - Saldo Energético (kW)
 - **Sistema de decisão automática** com alertas visuais categorizados por severidade
 
+## Lógica Energética
+ 
+A geração solar varia conforme a posição orbital:
+ 
+| Condição Solar | Geração Estimada |
+|---|---|
+| Sol Pleno | 80 – 100 kW |
+| Sombra (Eclipse) | 0 – 10 kW |
+ 
+O consumo é composto por:
+- **Suporte de vida:** 30 kW (fixo)
+- **Laboratório de pesquisa:** 10 – 60 kW (variável)
+
+O **Saldo Energético** = Geração Solar − Consumo Total. Um saldo negativo indica que as baterias estão sendo utilizadas.
+
 ## Lógica de Alertas
-
-| Sensor | Condição | Ação |
-|---|---|---|
-| Bateria | < 40% | 🔴 CRÍTICO — Desligamento do Laboratório de Pesquisa |
-| Temperatura | > 50 °C | 🟡 AVISO — Acionamento do resfriamento de emergência |
-| Comunicação | < 60% | 🟡 AVISO — Redirecionamento de energia para as antenas |
-
+ 
+| Sistema | Condição | Severidade | Ação |
+|---|---|---|---|
+| Saldo Energético | < 0 kW | 🟡 AVISO | Notificação de déficit; baterias em uso |
+| Bateria + Déficit | < 40% durante déficit | 🔴 CRÍTICO | Desligamento imediato do Laboratório |
+| Temperatura | > 50 °C | 🟡 AVISO | Acionamento do resfriamento de emergência |
+| Comunicação | < 60% | 🟡 AVISO | Redirecionamento de energia para as antenas |
+| Saldo Energético | ≥ 0 kW | 🟢 OK | Excedente redirecionado para carregar as baterias |
+ 
 O **Status Geral** é calculado da seguinte forma:
 - `OPERACIONAL` — Bateria ≥ 40%, Temperatura ≤ 50 °C e Comunicação ≥ 60%
 - `CRÍTICO` — Bateria < 40%
@@ -54,6 +76,17 @@ python -m streamlit run codigo-fonte.py
 ```
 
 A aplicação estará disponível em `http://localhost:8501`.
+
+## Observações
+ 
+- Todos os dados são **simulados aleatoriamente** a cada atualização, dentro dos seguintes intervalos:
+  - Bateria: 10% – 100%
+  - Temperatura: 20 °C – 70 °C
+  - Comunicação: 40% – 100%
+  - Geração Solar: 0 – 10 kW (eclipse) ou 80 – 100 kW (sol pleno)
+  - Consumo do Laboratório: 10 – 60 kW
+- O painel utiliza layout wide para melhor visualização das métricas.
+
 
 ## Integrantes do Grupo
 
